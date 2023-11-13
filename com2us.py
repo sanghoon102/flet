@@ -1,4 +1,5 @@
 import flet as ft
+import database as db
 #선수 모두의 이름을 가지는 list 생성
 #list의 객체는 튜플이고 튜플은 이름과 dictionary로 이루어짐
 players=[]
