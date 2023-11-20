@@ -1,8 +1,7 @@
 import flet as ft
 import database as db
-#선수 모두의 이름을 가지는 list 생성
-#list의 객체는 튜플이고 튜플은 이름과 dictionary로 이루어짐
-players=[]
+
+
 
 name=ft.TextField(hint_text="이름")
 grade=ft.TextField(hint_text="등급")
@@ -27,46 +26,18 @@ def main(page: ft.Page):
 
 
     def player_input(e):
-        d=dict()
-        d["등급"]=grade.value
-        d["카드 종류"]=type.value
-        d["고유능력1"]=skill1.value
-        d["고유능력2"]=skill2.value
-        d["고유능력3"]=skill3.value
-        players.append((name.value,d))
-
-        print(players)
+        db.insert_player(name.value,grade.value,type.value,skill1.value,skill2.value,skill3.value)
     def batter_input(a):
-        index=0
-        for i in range(len(players)):
-            if players[i][0]==name.value:
-                index=i
-                break
-
-        players[index][1]["타율"]=avg.value
-        players[index][1]["출루율"]=obp.value
-        players[index][1]["장타율"]=slg.value
-        players[index][1]["ops"]=ops.value
-        players[index][1]["득점권 타율"]=risp.value
-
+        db.insert_player(avg.value,obp.value,slg.value,ops.value,risp.value)
 
     def pitcher_input(e):
-        index = 0
-        for i in range(len(players)):
-            if players[i][0] == name.value:
-                index = i
-                break
-        players[index][1]["방어율"] = era.value
-        players[index][1]["경기수"] = g.value
-        players[index][1]["이닝"] = inning.value
-        players[index][1]["승리"] = w.value
-        players[index][1]["홀드"] = hld.value
-        players[index][1]["세이브"] = sv.value
+        db.insert_pitcher_stats(era.value,g.value,inning.value,w.value,hld.value,sv.value)
 
     t = ft.Tabs(
         selected_index=0,
         animation_duration=300,
         tabs=[
+
             ft.Tab(
                 text="타자 출력",
                 icon=ft.icons.BAR_CHART,
