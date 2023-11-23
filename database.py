@@ -1,80 +1,144 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship, Session
+import sqlite3
 
-Base = declarative_base()
+# SQLite 데이터베이스 연결
+conn = sqlite3.connect('baseball.db',check_same_thread=False)
+cursor = conn.cursor()
 
-class Player(Base):
-    __tablename__ = 'players'
+# 플레이어(Player) 테이블 생성 쿼리
+create_players_table = '''
+    CREATE TABLE IF NOT EXISTS players (
+        id INTEGER PRIMARY KEY,
+        name TEXT,
+        grade TEXT,
+        type TEXT,
+        skill1 TEXT,
+        skill2 TEXT,
+        skill3 TEXT
+    )
+'''
+cursor.execute(create_players_table)
+conn.commit()
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    grade = Column(String)
-    type = Column(String)
-    skill1 = Column(String)
-    skill2 = Column(String)
-    skill3 = Column(String)
-    stats = relationship('PlayerStats', back_populates='player')
+# 플레이어 스탯(PlayerStats) 테이블 생성 쿼리
+create_player_stats_table = '''
+    CREATE TABLE IF NOT EXISTS player_stats (
+        id INTEGER PRIMARY KEY,
+        player_id INTEGER,
+        avg REAL,
+        obp REAL,
+        slg REAL,
+        ops REAL,
+        risp REAL,
+        era REAL,
+        g INTEGER,
+        inning REAL,
+        w INTEGER,
+        hld INTEGER,
+        sv INTEGER,
+        FOREIGN KEY (player_id) REFERENCES players(id)
+    )
+'''
+cursor.execute(create_player_stats_table)
+conn.commit()
 
-class PlayerStats(Base):
-    __tablename__ = 'player_stats'
+# 데이터 삽입 함수 정의
+def insert_player(name, grade, type, skill1, skill2, skill3):
+    cursor.execute(
+        "INSERT INTO players (name, grade, type, skill1, skill2, skill3) VALUES (?, ?, ?, ?, ?, ?)",
+        (name, grade, type, skill1, skill2, skill3)
+    )
+    conn.commit()
 
-    id = Column(Integer, primary_key=True)
-    player_id = Column(Integer, ForeignKey('players.id'))
-    avg = Column(Float)
-    obp = Column(Float)
-    slg = Column(Float)
-    ops = Column(Float)
-    risp = Column(Float)
-    era = Column(Float)
-    g = Column(Integer)
-    inning = Column(Float)
-    w = Column(Integer)
-    hld = Column(Integer)
-    sv = Column(Integer)
-    player = relationship('Player', back_populates='stats')
+def insert_batter_stats(player_id, avg=None, obp=None, slg=None, ops=None, risp=None):
+    cursor.execute(
+        "INSERT INTO player_stats (player_id, avg, obp, slg, ops, risp) VALUES (?, ?, ?, ?, ?, ?)",
+        (player_id, avg, obp, slg, ops, risp)
+    )
+    conn.commit()
 
-# SQLite 데이터베이스에 연결
-engine = create_engine('sqlite:///baseball.db', echo=True)
+def insert_pitcher_stats(player_id, era=None, g=None, inning=None, w=None, hld=None, sv=None):
+    cursor.execute(
+        "INSERT INTO player_stats (player_id, era, g, inning, w, hld, sv) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (player_id, era, g, inning, w, hld, sv)
+    )
+    conn.commit()
 
-# 테이블 생성
-Base.metadata.create_all(engine)
+def get_batter_info(player_id):
+    cursor.execute("SELECT * FROM players WHERE id=?", (player_id,))
+    player = cursor.fetchone()
+    cursor.execute("SELECT * FROM player_stats WHERE player_id=?", (player_id,))
+    stats = cursor.fetchone()
+    return player,stats
 
-# 세션 생성
-session = Session(engine)
+def get_pitcher_info(player_id):
+    cursor.execute("SELECT * FROM players WHERE id=?", (player_id,))
+    player = cursor.fetchone()
+    cursor.execute("SELECT * FROM player_stats WHERE player_id=?", (player_id,))
+    stats = cursor.fetchone()
+    return player,stats
+def update_player_info_and_stats(player_id, column, new_value):
+    if column in ['name', 'grade', 'type', 'skill1', 'skill2', 'skill3']:
+        # 선수 정보 수정
+        cursor.execute(f'''
+            UPDATE players
+            SET {column}=?
+            WHERE id=?
+        ''', (new_value, player_id))
+        conn.commit()
+        print("선수 정보가 업데이트되었습니다.")
+    elif column in ['avg', 'obp', 'slg', 'ops', 'risp', 'era', 'g', 'inning', 'w', 'hld', 'sv']:
+        # 선수 스탯 수정
+        cursor.execute(f'''
+            UPDATE player_stats
+            SET {column}=?
+            WHERE player_id=?
+        ''', (new_value, player_id))
+        conn.commit()
+        print("선수 스탯이 업데이트되었습니다.")
+    else:
+        print("올바른 항목이 아닙니다.")
 
-# 함수 정의
-def insert_player(name, grade, type,skill1,skill2,skill3):
-    new_player = Player(name=name,grade=grade, type=type,skill1=skill1,skill2=skill2,skill3=skill3)
-    session.add(new_player)
-    session.commit()
+def initialize_database():
+    cursor.execute("DROP TABLE IF EXISTS players")
+    cursor.execute("DROP TABLE IF EXISTS player_stats")
 
-def insert_batter_stats(player_id, avg=None, obp=None, slg=None,
-                        ops=None, risp=None):
-    new_stats = PlayerStats(player_id=player_id, avg=avg,
-                            obp=obp, slugging_percentage=slugging_percentage,
-                            ops=ops, clutch_hitting_average=clutch_hitting_average)
-    session.add(new_stats)
-    session.commit()
+    # 플레이어(Player) 테이블 생성
+    cursor.execute('''
+        CREATE TABLE players (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            grade TEXT,
+            type TEXT,
+            skill1 TEXT,
+            skill2 TEXT,
+            skill3 TEXT
+        )
+    ''')
 
-def insert_pitcher_stats(player_id, earned_run_average=None, games_played=None,
-                         innings_pitched=None, wins=None, holds=None, saves=None):
-    new_stats = PlayerStats(player_id=player_id, pos='pitcher', earned_run_average=earned_run_average,
-                            games_played=games_played, innings_pitched=innings_pitched,
-                            wins=wins, holds=holds, saves=saves)
-    session.add(new_stats)
-    session.commit()
+    # 플레이어 스탯(PlayerStats) 테이블 생성
+    cursor.execute('''
+        CREATE TABLE player_stats (
+            id INTEGER PRIMARY KEY,
+            player_id INTEGER,
+            avg REAL,
+            obp REAL,
+            slg REAL,
+            ops REAL,
+            risp REAL,
+            era REAL,
+            g INTEGER,
+            inning REAL,
+            w INTEGER,
+            hld INTEGER,
+            sv INTEGER,
+            FOREIGN KEY (player_id) REFERENCES players(id)
+        )
+    ''')
 
+    conn.commit()
+    print("데이터베이스 초기화 및 테이블 재생성이 완료되었습니다.")
+initialize_database()
+# 데이터 삽입
 
-
-# 사용 예시
-insert_player('Player1', 'batter', 'A', 'Gold')
-insert_batter_stats(2, 0.300, 0.400, 0.500, 0.900, 0.320)
-
-insert_player('Player2', 'pitcher', 'B', 'Silver')
-insert_pitcher_stats(1, 3.50, 20, 150.0, 10, 5, 3)
-
-players = session.query(Player).join(PlayerStats).all()
-for player in players:
-        print(f"Player ID: {player.id}, Name: {player.name},  Grade: {player.grade}, Type: {player.type}")
-# 세션 종료
+# 연결 종료
 

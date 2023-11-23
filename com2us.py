@@ -2,7 +2,6 @@ import flet as ft
 import database as db
 
 
-
 name=ft.TextField(hint_text="이름")
 grade=ft.TextField(hint_text="등급")
 type=ft.TextField(hint_text="카드 종류")
@@ -22,16 +21,33 @@ hld=ft.TextField(hint_text="홀드")
 sv=ft.TextField(hint_text="세이브")
 
 
+
 def main(page: ft.Page):
+    t1 = dict()
+    bn=[]
+    pn=[]
+    bp=[0,0,0,0,0,0,0,0,0,0]
+    bs=[0,0,0,0,0,0,0,0,0,0]
+    pp=[0,0,0,0,0,0,0,0,0,0,0,0]
+    ps=[0,0,0,0,0,0,0,0,0,0,0,0]
 
 
     def player_input(e):
-        db.insert_player(name.value,grade.value,type.value,skill1.value,skill2.value,skill3.value)
-    def batter_input(a):
-        db.insert_player(avg.value,obp.value,slg.value,ops.value,risp.value)
 
+        db.insert_player(name.value,grade.value,type.value,skill1.value,skill2.value,skill3.value)
+        t1[name.value]=len(t1)+1
+
+    def batter_input(a):
+
+        db.insert_batter_stats(t1[name.value],avg.value,obp.value,slg.value,ops.value,risp.value)
+        bp[t1[name.value]],bs[t1[name.value]]=db.get_batter_info(t1[name.value])
+        bn.append(name.value)
+        print(bp[t1[name.value]][1],bs[t1[name.value]][2],bs[t1[name.value]][3],bs[t1[name.value]][4],bs[t1[name.value]][5],bs[t1[name.value]][6],bp[t1[name.value]][2],bp[t1[name.value]][3],bp[t1[name.value]][4],bp[t1[name.value]][5],bp[t1[name.value]][6])
     def pitcher_input(e):
-        db.insert_pitcher_stats(era.value,g.value,inning.value,w.value,hld.value,sv.value)
+        db.insert_pitcher_stats(t1[name.value],era.value,g.value,inning.value,w.value,hld.value,sv.value)
+        pp[t1[name.value]],ps[t1[name.value]]=db.get_pitcher_info(t1[name.value])
+        pn.append(name.value)
+        print(pp[t1[name.value]][1],ps[t1[name.value]][7],ps[t1[name.value]][8],ps[t1[name.value]][9],ps[t1[name.value]][10],ps[t1[name.value]][11],ps[t1[name.value]][12],pp[t1[name.value]][2],pp[t1[name.value]][3],pp[t1[name.value]][4],pp[t1[name.value]][5],pp[t1[name.value]][6])
 
     t = ft.Tabs(
         selected_index=0,
@@ -57,21 +73,23 @@ def main(page: ft.Page):
                     ],
                     rows=[
 
-                        ft.DataRow(
-                            cells=[
-                                ft.DataCell(ft.Text("박해민")),
-                                ft.DataCell(ft.Text("0.300")),
-                                ft.DataCell(ft.Text("0.393")),
-                                ft.DataCell(ft.Text("0.455")),
-                                ft.DataCell(ft.Text("0.848")),
-                                ft.DataCell(ft.Text("0.323")),
-                                ft.DataCell(ft.Text("플래티넘")),
-                                ft.DataCell(ft.Text("시그니처")),
-                                ft.DataCell(ft.Text("예지력")),
-                                ft.DataCell(ft.Text("게스히터")),
-                                ft.DataCell(ft.Text("집중력")),
-                            ],
-                        ),
+                            ft.DataRow(
+                                cells=[
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱")),
+                                    ft.DataCell(ft.Text("맛자욱"))
+
+
+                                ],
+                            ),
 
 
                     ],
@@ -100,19 +118,11 @@ def main(page: ft.Page):
 
                         ft.DataRow(
                             cells=[
-                                ft.DataCell(ft.Text("정민철")),
-                                ft.DataCell(ft.Text("0.71")),
-                                ft.DataCell(ft.Text("25")),
-                                ft.DataCell(ft.Text("175")),
-                                ft.DataCell(ft.Text("17")),
-                                ft.DataCell(ft.Text("0")),
-                                ft.DataCell(ft.Text("0")),
-                                ft.DataCell(ft.Text("레전드")),
-                                ft.DataCell(ft.Text("레전드")),
-                                ft.DataCell(ft.Text("슈퍼스타")),
-                                ft.DataCell(ft.Text("끝판왕")),
-                                ft.DataCell(ft.Text("버닝")),
+
+
                             ],
+
+
                         ),
 
 
@@ -130,11 +140,6 @@ def main(page: ft.Page):
                                    skill3,
                                    ft.ElevatedButton("입력",on_click=player_input)])
 
-            ),
-            ft.Tab(
-                text="선수 편집",
-                icon=ft.icons.EDIT,
-                content=ft.TextField(hint_text="고칠 선수의 이름을 입력하세요")
             ),
             ft.Tab(
                 text="타자 성적 입력",
@@ -163,7 +168,7 @@ def main(page: ft.Page):
                                    ])
             ),
             ft.Tab(
-                text="성적 편집",
+                text="선수 정보 및 성적 편집",
                 icon=ft.icons.EDIT,
                 content=ft.TextField(hint_text="고칠 선수의 이름을 입력하세요")
             ),
