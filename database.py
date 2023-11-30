@@ -98,6 +98,8 @@ def update_player_info_and_stats(player_id, column, new_value):
     else:
         print("올바른 항목이 아닙니다.")
 
+
+
 def initialize_database():
     cursor.execute("DROP TABLE IF EXISTS players")
     cursor.execute("DROP TABLE IF EXISTS player_stats")
