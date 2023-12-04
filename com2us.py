@@ -35,8 +35,14 @@ def main(page: ft.Page):
          '이닝': 'inning', '승리': 'g', '홀드': 'hld', '세이브': 'sv'}
     bo = []
     po = []
-    boc=[]
+    boc = []
     bso = []
+    whattosort = [1]
+    def avgdef(e):
+        whattosort.clear()
+        whattosort.append(1)
+    def tasoondef(e):
+        pass
     def player_input(e):
         if name.value in t1:
 
@@ -414,6 +420,7 @@ def main(page: ft.Page):
 
 
 
+
     t = ft.Tabs(
         selected_index=0,
         animation_duration=300,
@@ -489,27 +496,54 @@ def main(page: ft.Page):
 
     page.add(t)
     page.update()
+    if whattosort[0]==0:
+        btable = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("이름")),
+                ft.DataColumn(ft.Text("타율")),
+                ft.DataColumn(ft.Text("출루율")),
+                ft.DataColumn(ft.Text("장타율")),
+                ft.DataColumn(ft.Text("ops")),
+                ft.DataColumn(ft.Text("득점권 타율")),
+                ft.DataColumn(ft.Text("등급")),
+                ft.DataColumn(ft.Text("카드 종류")),
+                ft.DataColumn(ft.Text("고유능력1")),
+                ft.DataColumn(ft.Text("고유능력2")),
+                ft.DataColumn(ft.Text("고유능력3")),
+            ],
+            rows=bo
+        )
+        print(whattosort)
+    elif whattosort[0]==1:
+        btable = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("이름")),
+                ft.DataColumn(ft.Text("타율")),
+                ft.DataColumn(ft.Text("출루율")),
+                ft.DataColumn(ft.Text("장타율")),
+                ft.DataColumn(ft.Text("ops")),
+                ft.DataColumn(ft.Text("득점권 타율")),
+                ft.DataColumn(ft.Text("등급")),
+                ft.DataColumn(ft.Text("카드 종류")),
+                ft.DataColumn(ft.Text("고유능력1")),
+                ft.DataColumn(ft.Text("고유능력2")),
+                ft.DataColumn(ft.Text("고유능력3")),
+            ],
+            rows=bso
+        )
+        print(whattosort)
+        print(bso)
 
-    btable = ft.DataTable(
-        columns=[
-            ft.DataColumn(ft.Text("이름")),
-            ft.DataColumn(ft.Text("타율")),
-            ft.DataColumn(ft.Text("출루율")),
-            ft.DataColumn(ft.Text("장타율")),
-            ft.DataColumn(ft.Text("ops")),
-            ft.DataColumn(ft.Text("득점권 타율")),
-            ft.DataColumn(ft.Text("등급")),
-            ft.DataColumn(ft.Text("카드 종류")),
-            ft.DataColumn(ft.Text("고유능력1")),
-            ft.DataColumn(ft.Text("고유능력2")),
-            ft.DataColumn(ft.Text("고유능력3")),
-        ],
-        rows=bo
-    )
     bv = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=False, on_scroll=True)
+
     bv.controls.append(btable)
-    t.tabs[0].content = bv
+
+    t.tabs[0].content = ft.Column([bv,ft.Row([ft.ElevatedButton('타율순 정렬',on_click=avgdef),ft.ElevatedButton('출루율순 정렬'),ft.ElevatedButton('장타율순 정렬'),ft.ElevatedButton('ops순 정렬'),ft.ElevatedButton('득점권 타율순 정렬'),ft.ElevatedButton('타선순 정렬',on_click=tasoondef)])])
     t.update()
+
+
+
+
 
     ptable = ft.DataTable(
         columns=[
@@ -531,7 +565,7 @@ def main(page: ft.Page):
 
     pv = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=False, on_scroll=True)
     pv.controls.append(ptable)
-    t.tabs[1].content = pv
+    t.tabs[1].content = ft.Column([pv,ft.Row([ft.ElevatedButton('방어율순 정렬'),ft.ElevatedButton('경기 수 순 정렬'),ft.ElevatedButton('이닝순 정렬'),ft.ElevatedButton('승리순 정렬'),ft.ElevatedButton('홀드순 정렬'),ft.ElevatedButton('세이브순 정렬'),ft.ElevatedButton('보직순 정렬')])])
     t.update()
 
     bsotable=ft.DataTable(
@@ -554,6 +588,7 @@ def main(page: ft.Page):
     bsov.controls.append(bsotable)
     t.tabs[6].content = bsov
     t.update()
+
 
 ft.app(target=main)
 
