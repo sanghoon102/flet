@@ -85,7 +85,7 @@ def update_player_info_and_stats(player_id, column, new_value):
             WHERE id=?
         ''', (new_value, player_id))
         conn.commit()
-        print("선수 정보가 업데이트되었습니다.")
+
     elif column in ['avg', 'obp', 'slg', 'ops', 'risp', 'era', 'g', 'inning', 'w', 'hld', 'sv']:
         # 선수 스탯 수정
         cursor.execute(f'''
@@ -94,9 +94,12 @@ def update_player_info_and_stats(player_id, column, new_value):
             WHERE player_id=?
         ''', (new_value, player_id))
         conn.commit()
-        print("선수 스탯이 업데이트되었습니다.")
-    else:
-        print("올바른 항목이 아닙니다.")
+
+
+def delete_player(player_id):
+    cursor.execute("DELETE FROM players WHERE id=?", (player_id,))
+    cursor.execute("DELETE FROM player_stats WHERE player_id=?", (player_id,))
+    conn.commit()
 
 
 
@@ -138,7 +141,7 @@ def initialize_database():
     ''')
 
     conn.commit()
-    print("데이터베이스 초기화 및 테이블 재생성이 완료되었습니다.")
+
 initialize_database()
 # 데이터 삽입
 
